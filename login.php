@@ -10,17 +10,15 @@ if (isset($_SESSION['user_id'])){
 $error_message = "";
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
-    $username = $db->real_escape_string($_POST['username']);
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
 
     $stmt = $db->prepare("SELECT user_id, username, password FROM users WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
 
-    if ($result->num_rows == 1){
-        $user = $result->fetch_assoc();
-        
+    if ($user){
+
         if (password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['username'] = $user['username'];
@@ -34,7 +32,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }else{
         $error_message = "Invalid username or password.";
     }
-    $stmt->close();
 }
 
 ?>
@@ -45,7 +42,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <form action ="index.php" method=" POST">
 
     <style>
         body {
@@ -110,13 +106,22 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
+
+        .error-message {
+            color: #dc3545; /* Bootstrap red for errors */
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <div class="login-container">
         <h1>User Login</h1>
-        <form>
+        <?php if (!empty($error_message)): ?>
+        <div class="error-message"><?php echo $error_message; ?></div>
+        <?php endif; ?>
+        <form action="login.php" method="POST">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username">
 
@@ -129,8 +134,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         </form>
         
         <div class="login-link">
-            <form action = "Register.php" method = "POST">
-            Already have an account? <a href=" Register.php "> Registration here</a>            
+            Don't have an account? <a href="Register.php">Register here</a>            
             <?php
             echo nl2br(" "); 
             echo nl2br(" ");

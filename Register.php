@@ -12,7 +12,7 @@ $success_message = "";
 $error_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $db->real_escape_string($_POST['username']);
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
@@ -25,20 +25,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         
         $stmt = $db->prepare("SELECT user_id FROM users WHERE username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $stmt->store_result();
+        $stmt->execute([$username]);
 
-        if ($stmt->num_rows > 0) {
+        if ($stmt->fetch()) {
             $error_message = "Username already exists. Please choose a different one.";
         } else {
-           
+
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             $stmt_insert = $db->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-            $stmt_insert->bind_param("ss", $username, $hashed_password);
 
-            if ($stmt_insert->execute()) {
-                $new_user_id = $stmt_insert->insert_id;
+            if ($stmt_insert->execute([$username, $hashed_password])) {
+                $new_user_id = $db->lastInsertId();
 
                 $_SESSION['user_id'] = $new_user_id;
                 $_SESSION['username'] = $username;
@@ -46,11 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: login.php");
                 exit();
             } else {
-                $error_message = "Error: Please try again!" . $stmt_insert->error;
+                $error_message = "Error: Please try again!";
             }
-            $stmt_insert->close();
         }
-        $stmt->close();
     }
 }
 ?>
