@@ -258,7 +258,7 @@ if (isset($_POST['delete_avatar'])) {
                 <?php if (isset($_SESSION['avatar_path']) && file_exists($_SESSION['avatar_path'])): ?>
                     <img src="<?= htmlspecialchars($_SESSION['avatar_path']) ?>" alt="Profile picture" class="avatar">
                 <?php endif; ?>
-                <p>Hello, John Paul</p>
+                <p>Hello, <?= htmlspecialchars($_SESSION['username'] ?? 'Guest') ?></p>
                 <form method="post" action="" enctype="multipart/form-data" class="avatar-upload-form">
                     <input type="file" name="avatar" accept="image/jpeg,image/png,image/gif" required>
                     <div class="avatar-actions">
