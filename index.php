@@ -57,7 +57,6 @@ if (isset($_POST['upload_avatar'])) {
     } else {
         $uploadOk = 0;
     }
-}
     // Check file size (max 2MB)
     if ($_FILES["avatar"]["size"] > 2000000) {
         $uploadOk = 0;
@@ -82,6 +81,7 @@ if (isset($_POST['upload_avatar'])) {
             $_SESSION['avatar_path'] = $target_file;
         }
     }
+}
 
     // Handle avatar deletion
 if (isset($_POST['delete_avatar'])) {
@@ -255,7 +255,21 @@ if (isset($_POST['delete_avatar'])) {
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="user">
+                <?php if (isset($_SESSION['avatar_path']) && file_exists($_SESSION['avatar_path'])): ?>
+                    <img src="<?= htmlspecialchars($_SESSION['avatar_path']) ?>" alt="Profile picture" class="avatar">
+                <?php endif; ?>
                 <p>Hello, John Paul</p>
+                <form method="post" action="" enctype="multipart/form-data" class="avatar-upload-form">
+                    <input type="file" name="avatar" accept="image/jpeg,image/png,image/gif" required>
+                    <div class="avatar-actions">
+                        <button type="submit" name="upload_avatar">Upload</button>
+                    </div>
+                </form>
+                <?php if (isset($_SESSION['avatar_path'])): ?>
+                    <form method="post" action="" class="avatar-actions">
+                        <button type="submit" name="delete_avatar" class="delete-avatar">Delete Picture</button>
+                    </form>
+                <?php endif; ?>
             </div>
             <ul class="menu">
                 <li>Notifications</li>
